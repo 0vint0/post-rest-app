@@ -10,7 +10,8 @@ type Repositories struct {
 }
 
 type PostRepository interface {
-	FindAll() []model.Post
+	FindAll() ([]model.Post, error)
+	Create(post model.Post) (uint, error)
 }
 
 func Init(db *gorm.DB) *Repositories {

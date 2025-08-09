@@ -1,0 +1,8 @@
+POST http://localhost:8080/posts
+Content-Type: application/
+
+{
+    "Title"   : "My First Post",
+	"Text":   "This is my first post!!"
+	
+}

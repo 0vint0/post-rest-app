@@ -1,8 +1,14 @@
 package service
 
-import "vitaliesvet.com/post-rest-app/persistent/repository"
+import (
+	"vitaliesvet.com/post-rest-app/persistent/repository"
+	"vitaliesvet.com/post-rest-app/rest/view"
+)
 
-type PostService interface{}
+type PostService interface {
+	Create(p view.PostView) (view.PostView, error)
+	FindAll() ([]view.PostView, error)
+}
 
 type Services struct {
 	PostService PostService
