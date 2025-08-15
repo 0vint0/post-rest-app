@@ -20,8 +20,11 @@ func (r *PostRepositoryImpl) Create(post model.Post) (uint, error) {
 	return post.ID, result.Error
 }
 
-func (r *PostRepositoryImpl) FindAll() ([]model.Post, error) {
+func (r *PostRepositoryImpl) FindAll(pageNumber, pageSize int64) ([]model.Post, int64, error) {
 	var post []model.Post
-	results := r.db.Find(&post)
-	return post, results.Error
+	offset := pageNumber * pageSize
+	results := r.db.Offset(int(offset)).Limit(int(pageSize)).Find(&post)
+	var totalElements int64
+	r.db.Model(&model.Post{}).Count(&totalElements)
+	return post, totalElements, results.Error
 }

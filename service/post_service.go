@@ -8,10 +8,10 @@ import (
 )
 
 type PostServiceImpl struct {
-	postRepository *repository.PostRepository
+	postRepository repository.PostRepository
 }
 
-func NewPostService(postRepository *repository.PostRepository) PostService {
+func NewPostService(postRepository repository.PostRepository) PostService[view.PostView] {
 	return &PostServiceImpl{
 		postRepository: postRepository,
 	}
@@ -23,19 +23,25 @@ func (s *PostServiceImpl) Create(p view.PostView) (view.PostView, error) {
 		Text:  p.Text,
 	}
 
-	id, error := (*s.postRepository).Create(post)
+	id, error := s.postRepository.Create(post)
 	p.ID = id
 	return p, error
 }
 
-func (s *PostServiceImpl) FindAll() ([]view.PostView, error) {
-	posts, error := (*s.postRepository).FindAll()
-	return lo.Map(posts, mapToView), error
+func (s *PostServiceImpl) FindAll(p view.PagedRequest) (view.Paginated[view.PostView], error) {
+	posts, totalElements, error := s.postRepository.FindAll(p.PageNumber, p.PageSize)
+	postViews := lo.Map(posts, mapToView)
+	return view.Paginated[view.PostView]{
+		Items:      postViews,
+		PageNumber: p.PageNumber,
+		PageSize:   p.PageSize,
+		TotalSize:  totalElements,
+	}, error
 }
 
 func mapToView(model model.Post, index int) view.PostView {
 	return view.PostView{
-		ID:    model.ID,
+		View:  view.View{ID: model.ID},
 		Text:  model.Text,
 		Title: model.Title,
 	}

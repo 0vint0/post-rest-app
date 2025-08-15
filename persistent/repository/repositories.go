@@ -10,7 +10,7 @@ type Repositories struct {
 }
 
 type PostRepository interface {
-	FindAll() ([]model.Post, error)
+	FindAll(pageNumber, pageSize int64) ([]model.Post, int64, error)
 	Create(post model.Post) (uint, error)
 }
 

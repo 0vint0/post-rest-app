@@ -1,7 +1,9 @@
 package view
 
 type PostView struct {
-	ID    uint
-	Title string
-	Text  string
+	View  `json:",inline"`
+	Title string `json:"title"`
+	Text  string `json:"text"`
 }
+
+func (v PostView) GetID() uint { return v.ID }
