@@ -1,1 +1,1 @@
-GET http://localhost:8080/posts?pageNumber=0&pageSize=2
+GET http://localhost:8080/posts?pageNumber=2&pageSize=3
