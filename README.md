@@ -13,3 +13,7 @@ docker container prune
 
 ## Run all tests
 go test ./...
+
+## Start Docker Compose with Grafana+Prometheus
+docker-compose -f docker-compose.yml up -d
+
