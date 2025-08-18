@@ -6,6 +6,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
+	"vitaliesvet.com/post-rest-app/error_handler"
 	model "vitaliesvet.com/post-rest-app/persistent/db/model/post"
 	"vitaliesvet.com/post-rest-app/persistent/repository/mocks"
 	"vitaliesvet.com/post-rest-app/rest/view"
@@ -32,6 +33,59 @@ func TestPostService(t *testing.T) {
 		assert.Nil(t, error)
 		assert.Equal(t, int64(2), actualResult.TotalSize, "Invalid FindAll Post TotalSize Result !!!")
 		assert.Equal(t, expectedResult, actualResult.Items, "Invalid FindAll Post list Result !!!")
+	})
+
+	t.Run("Test create a Post with success.", func(t *testing.T) {
+		postView := view.PostView{
+			Title: "MyTitle1",
+			Text:  "My text",
+		}
+		var expectedPostId uint = 23
+		postRepositoryMock.EXPECT().Create(gomock.Any()).Return(expectedPostId, nil)
+		postRepositoryMock.EXPECT().CountByTitle(gomock.Any()).Return(int64(0), nil)
+
+		actualResult, error := toTest.Create(postView)
+
+		assert.Nil(t, error)
+		assert.Equal(t, expectedPostId, actualResult.ID, "Invalid Expected Post ID !!!")
+	})
+
+	t.Run("Test create a Post with missing Title.", func(t *testing.T) {
+		postView := view.PostView{
+			Text: "My text",
+		}
+		// var expectedPostId uint = 23
+		// postRepositoryMock.EXPECT().Create(gomock.Any()).Return(expectedPostId, nil)
+		// postRepositoryMock.EXPECT().CountByTitle(gomock.Any()).Return(int64(0), nil)
+
+		_, err := toTest.Create(postView)
+
+		var verrs *error_handler.ValidationError
+		if assert.ErrorAs(t, err, &verrs) {
+			assert.Equal(t, "required", verrs.Fields[0].Tag)
+			assert.Equal(t, "Title", verrs.Fields[0].Field)
+		}
+
+	})
+
+	t.Run("Test create a Post with not unique Title.", func(t *testing.T) {
+		title := "MyTitle1"
+		postView := view.PostView{
+			Title: title,
+			Text:  "My text",
+		}
+		// var expectedPostId uint = 23
+		// postRepositoryMock.EXPECT().Create(gomock.Any()).Return(expectedPostId, nil)
+		postRepositoryMock.EXPECT().CountByTitle(title).Return(int64(1), nil)
+
+		_, err := toTest.Create(postView)
+
+		var verrs *error_handler.ValidationError
+		if assert.ErrorAs(t, err, &verrs) {
+			assert.Equal(t, "is-unique-post-title", verrs.Fields[0].Tag)
+			assert.Equal(t, "Title", verrs.Fields[0].Field)
+		}
+
 	})
 
 }

@@ -34,6 +34,21 @@ func (m *MockPostRepository) EXPECT() *MockPostRepositoryMockRecorder {
 	return m.recorder
 }
 
+// CountByTitle mocks base method.
+func (m *MockPostRepository) CountByTitle(title string) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountByTitle", title)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountByTitle indicates an expected call of CountByTitle.
+func (mr *MockPostRepositoryMockRecorder) CountByTitle(title interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountByTitle", reflect.TypeOf((*MockPostRepository)(nil).CountByTitle), title)
+}
+
 // Create mocks base method.
 func (m *MockPostRepository) Create(post model.Post) (uint, error) {
 	m.ctrl.T.Helper()
