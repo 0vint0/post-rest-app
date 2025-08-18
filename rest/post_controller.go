@@ -1,11 +1,13 @@
 package rest
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"vitaliesvet.com/post-rest-app/error_handler"
 	"vitaliesvet.com/post-rest-app/rest/view"
 	"vitaliesvet.com/post-rest-app/service"
 )
@@ -17,13 +19,11 @@ type PostControllerImpl struct {
 func (p *PostControllerImpl) createPost(context *gin.Context) {
 	var post view.PostView
 	error := context.ShouldBindJSON(&post)
-	if error != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse provided values!"})
+	if !handleError(context, error, "Could not parse provided values!") {
 		return
 	}
 	post, error = (*p.postService).Create(post)
-	if error != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not create post!", "error": error})
+	if !handleError(context, error) {
 		return
 	}
 	context.JSON(http.StatusCreated, gin.H{"message": "Post Created", "post": post})
@@ -60,4 +60,28 @@ func NewPostController(postService *service.PostService[view.PostView]) PostCont
 	return &PostControllerImpl{
 		postService: postService,
 	}
+}
+
+func handleError(context *gin.Context, error error, message ...string) bool {
+	if error != nil {
+		if message != nil {
+			context.JSON(http.StatusBadRequest, gin.H{"message": message})
+			return false
+		}
+		var vErr *error_handler.ValidationError
+		if errors.As(error, &vErr) {
+			context.JSON(http.StatusPreconditionFailed, gin.H{ // 412
+				"error":   "validation_failed",
+				"details": vErr.Fields,
+			})
+			return false
+		}
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "internal",
+			"message": "something went wrong",
+			"details": error,
+		})
+
+	}
+	return true
 }

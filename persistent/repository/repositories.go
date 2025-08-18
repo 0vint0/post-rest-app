@@ -11,6 +11,7 @@ type Repositories struct {
 
 type PostRepository interface {
 	FindAll(pageNumber, pageSize int64) ([]model.Post, int64, error)
+	CountByTitle(title string) (int64, error)
 	Create(post model.Post) (uint, error)
 }
 

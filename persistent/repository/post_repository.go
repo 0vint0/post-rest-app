@@ -20,6 +20,12 @@ func (r *PostRepositoryImpl) Create(post model.Post) (uint, error) {
 	return post.ID, result.Error
 }
 
+func (r *PostRepositoryImpl) CountByTitle(title string) (int64, error) {
+	var totalElements int64
+	results := r.db.Model(&model.Post{}).Where("title = ?", title).Count(&totalElements)
+	return totalElements, results.Error
+}
+
 func (r *PostRepositoryImpl) FindAll(pageNumber, pageSize int64) ([]model.Post, int64, error) {
 	var post []model.Post
 	offset := pageNumber * pageSize
