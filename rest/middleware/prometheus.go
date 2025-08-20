@@ -23,21 +23,34 @@ var (
 		},
 		[]string{"path", "status"},
 	)
+
+	RequestDuration = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "post_rest_app_requests_duration",
+			Help:    "Duration of HTTP requests",
+			Buckets: prometheus.DefBuckets,
+		},
+		[]string{"path", "method"},
+	)
 )
 
 func PrometheusInit() {
 	prometheus.MustRegister(RequestCount)
 	prometheus.MustRegister(ErrorCount)
+	prometheus.MustRegister(RequestDuration)
 }
 
 func TrackMetrics() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		path := c.Request.URL.Path
+		method := c.Request.Method
+		timer := prometheus.NewTimer(RequestDuration.WithLabelValues(path, method))
 		c.Next()
 		status := c.Writer.Status()
 		RequestCount.WithLabelValues(path, http.StatusText(status)).Inc()
 		if status >= 400 {
 			ErrorCount.WithLabelValues(path, http.StatusText(status)).Inc()
 		}
+		timer.ObserveDuration()
 	}
 }

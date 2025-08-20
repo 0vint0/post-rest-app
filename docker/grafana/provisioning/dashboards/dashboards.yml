@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: 'Default'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      # set to true if each JSON has its own folder to make a folder per file
+      foldersFromFilesStructure: false
